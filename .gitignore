@@ -1,0 +1,6 @@
+*.bat
+.cph
+output
+.vscode
+*.code-workspace
+*.py
