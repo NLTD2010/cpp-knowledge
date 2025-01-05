@@ -1,0 +1,91 @@
+import requests
+import json
+from bs4 import BeautifulSoup
+
+# Function to log in and retrieve cookies
+def login_and_get_cookies(username, password):
+    # Define login URL
+    login_url = "https://client.falixnodes.net/auth/login"
+    
+    # Create a session object
+    session = requests.Session()
+    
+    # Optional headers
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    }
+    
+    # Perform GET request to fetch the login page
+    try:
+        response = session.get(login_url, headers=headers)
+        if response.status_code != 200:
+            print(f"Failed to fetch login page. Status Code: {response.status_code}")
+            return None, None
+        
+        # Parse the login page
+        soup = BeautifulSoup(response.text, "html.parser")
+        # Debug: Print the form structure to identify input names
+        print("Login Form Structure:", soup.find("form"))
+        
+        # Prepare payload
+        # Update the field names based on the actual input names in the form
+        payload = {
+            "email-address": username,
+            "password": password,
+        }
+        
+        # Perform login POST request
+        login_response = session.post(login_url, data=payload, headers=headers)
+        
+        if login_response.status_code == 200:
+            print("Login successful!")
+            
+            # Extract cookies
+            cookies = session.cookies.get_dict()
+            if cookies:
+                print("Cookies:")
+                for key, value in cookies.items():
+                    print(f"{key}: {value}")
+                return cookies, session
+            else:
+                print("No cookies received.")
+                return None, None
+        else:
+            print(f"Login failed. Status Code: {login_response.status_code}")
+            print("Response:", login_response.text)
+            return None, None
+    except Exception as e:
+        print("An error occurred:", e)
+        return None, None
+
+# Function to save cookies to a file
+def save_cookies_to_file(cookies, filename="cookies.json"):
+    try:
+        with open(filename, "w") as f:
+            json.dump(cookies, f, indent=4)
+        print(f"Cookies saved to {filename}")
+    except Exception as e:
+        print("Failed to save cookies:", e)
+
+# Function to load cookies from a file
+def load_cookies_from_file(filename="cookies.json"):
+    try:
+        with open(filename, "r") as f:
+            cookies = json.load(f)
+        print(f"Cookies loaded from {filename}")
+        return cookies
+    except Exception as e:
+        print("Failed to load cookies:", e)
+        return None
+
+# Main execution
+if __name__ == "__main__":
+    # Replace with your credentials
+    username = "nguyenlethaiduong11102010@gmail.com"
+    password = "thaiduong2010"
+    # Log in and retrieve cookies
+    cookies, session = login_and_get_cookies(username, password)
+    
+    if cookies:
+        # Save cookies to a file
+        save_cookies_to_file(cookies)
